@@ -10,7 +10,7 @@ public class ProtectionField
 {
 	UUID owner;
 	ArrayList<UUID> members = new ArrayList<UUID>();
-	ProtectionField(Location a, Location b)
+	ProtectionField(Location a, Location b, Player owner)
 	{
 		this.x1 = a.getX();
 		this.y1 = a.getY();
@@ -18,6 +18,7 @@ public class ProtectionField
 		this.x2 = b.getX();
 		this.y2 = b.getY();
 		this.z2 = b.getZ();
+		this.owner = owner.getUniqueId();
 	}
 	double x1;
 	double y1;
@@ -25,13 +26,14 @@ public class ProtectionField
 	double x2;
 	double y2;
 	double z2;
+	boolean chestFlag;
+	public boolean getChestFlag()
+	{
+		return chestFlag;
+	}
 	public UUID getOwner()
 	{
 		return owner;
-	}
-	public void setOwner(UUID owner)
-	{
-		this.owner = owner;
 	}
 	public double getX1()
 	{
