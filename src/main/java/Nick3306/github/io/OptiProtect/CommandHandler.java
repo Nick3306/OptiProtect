@@ -8,7 +8,13 @@ import org.bukkit.entity.Player;
 
 public class CommandHandler implements CommandExecutor
 {
-
+	private Main plugin;
+	private Utilities util;
+	public CommandHandler(Main plugin)
+	{
+	   this.plugin = plugin;
+	   this.util = this.plugin.util;
+	}
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String arg2lable, String[] args) 
 	{
@@ -24,7 +30,10 @@ public class CommandHandler implements CommandExecutor
 				}
 				else
 				{
-					
+					ProtectionField newField = new ProtectionField(null, null, player, plugin.getConfig().getInt("FieldID"));
+					plugin.newFields.add(newField);
+					plugin.getConfig().set("FieldID", plugin.getConfig().getInt("FieldID")+ 1);
+					player.sendMessage(ChatColor.GREEN + "Place the first block to define the field");
 				}
 			}
 		}
