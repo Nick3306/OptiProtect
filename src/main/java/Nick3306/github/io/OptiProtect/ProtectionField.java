@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 public class ProtectionField
@@ -13,12 +14,15 @@ public class ProtectionField
 	ArrayList<UUID> members = new ArrayList<UUID>();
 	Location block1;
 	Location block2;
+	World world;
 	
-	ProtectionField(Location block1, Location block2, Player owner, int id)
+	ProtectionField(World world, Location block1, Location block2, UUID owner, int id)
 	{
+		this.world = world;
 		this.block1 = block1;
 		this.block2 = block2;
-		this.owner = owner.getUniqueId();
+		this.owner = owner;
+		
 	}
 	boolean chestFlag;
 	public boolean getChestFlag()
@@ -28,6 +32,10 @@ public class ProtectionField
 	public UUID getOwner()
 	{
 		return owner;
+	}
+	public World getWorld()
+	{
+		return world;
 	}
 	public Location getBlock1()
 	{
@@ -60,5 +68,19 @@ public class ProtectionField
 	public double getArea()
 	{
 		return (Math.abs(block2.getX())-Math.abs(block1.getBlockX())) * (Math.abs(block2.getY())-Math.abs(block1.getY())) * (Math.abs(block2.getZ())-Math.abs(block1.getZ()));
+	}
+	public boolean inPField(Location loc)
+	{
+		int maxX = Math.max(block1.getBlockX(), block2.getBlockX());
+		int minX = Math.min(block1.getBlockX(), block2.getBlockX());
+		int maxY = Math.max(block1.getBlockY(), block2.getBlockY());
+		int minY = Math.min(block1.getBlockY(), block2.getBlockY());
+		int maxZ = Math.max(block1.getBlockZ(), block2.getBlockZ());
+		int minZ = Math.min(block1.getBlockZ(), block2.getBlockZ());
+		if(loc.getBlockX() >= minX && loc.getBlockX() <= maxX && loc.getBlockY() >= minY && loc.getBlockY() <= maxY && loc.getBlockZ() >= minZ && loc.getBlockZ() <= maxZ)
+		{
+			return true;
+		}
+		return false;
 	}
 }

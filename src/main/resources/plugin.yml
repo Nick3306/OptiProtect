@@ -2,7 +2,7 @@ name: OptiProtect
 main: Nick3306.github.io.OptiProtect.Main
 version: .01
 commands:
-   Quest:
+   Protect:
       description: OptiProtect
       usage:
       permission: 

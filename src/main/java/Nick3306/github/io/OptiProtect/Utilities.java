@@ -12,6 +12,14 @@ public class Utilities
 	}
 	public ProtectionField getPField(Location loc)
 	{
+		for(ProtectionField field : plugin.fields)
+		{
+			if(field.inPField(loc))
+			{
+				return field;
+			}
+		}
+
 		return null;
 	}
 	public boolean definingField(Player player)
