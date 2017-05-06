@@ -1,6 +1,9 @@
 package Nick3306.github.io.OptiProtect;
 
+import java.beans.PropertyVetoException;
 import java.util.ArrayList;
+
+import javax.naming.NamingException;
 
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -15,6 +18,7 @@ public class Main extends JavaPlugin
 	public ArrayList<ProtectionField> fields = new ArrayList<ProtectionField>();
 	public ArrayList<ProtectionField> newFields = new ArrayList<ProtectionField>();
 	public Utilities util;
+	public MySql sql;
 	public void onEnable()
 	{
 		PluginManager pm = getServer().getPluginManager();
@@ -26,11 +30,13 @@ public class Main extends JavaPlugin
 		
 		getCommand("Protect").setExecutor(new CommandHandler(this));
 		
-		
+
+			sql = new MySql(this);		 
+			sql.getFields();
 		
 	}
 	public void onDisable()
 	{
-		
+		sql.closeConnections();
 	}
 }

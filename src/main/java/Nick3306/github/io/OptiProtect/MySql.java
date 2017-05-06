@@ -1,5 +1,6 @@
 package Nick3306.github.io.OptiProtect;
 
+import java.beans.PropertyVetoException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -7,20 +8,46 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
+import javax.naming.NamingException;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+
+import com.mchange.v2.c3p0.jboss.C3P0PooledDataSource;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 
 public class MySql 
 {
 	private Main plugin;
 	private Utilities util;
+	ComboPooledDataSource cpds;
 	public MySql(Main plugin)
 	{
 		this.plugin = plugin;
 		this.util = this.plugin.util;
+		
+		cpds = new ComboPooledDataSource();
+		try
+		{
+			cpds.setDriverClass( "com.mysql.jdbc.Driver" );
+		} catch (PropertyVetoException e)
+		{
+			
+			e.printStackTrace();
+		} 
+		//loads the jdbc driver
+		cpds.setJdbcUrl( "jdbc:mysql://144.217.68.13:3306/mc30874" );
+		cpds.setUser("mc30875");
+		cpds.setPassword("cad6a753e0");
+
+		// the settings below are optional -- c3p0 can work with defaults
+		cpds.setInitialPoolSize(5);
+		cpds.setMinPoolSize(5);
+		cpds.setAcquireIncrement(5);
+		cpds.setMaxPoolSize(15);
 	}
 public void getFields()
 {
@@ -37,12 +64,13 @@ public void getFields()
 
 			try 
 			{
-				Connection myConn = DriverManager.getConnection("jdbc:mysql://144.217.68.13:3306/mc30874","mc30875","cad6a753e0");
+				//Connection myConn = DriverManager.getConnection("jdbc:mysql://144.217.68.13:3306/mc30874","mc30875","cad6a753e0");
+				Connection myConn = cpds.getConnection();
 				PreparedStatement myStatement = myConn.prepareStatement("SELECT * FROM ProtectionFields;");
 				ResultSet fieldsResult = myStatement.executeQuery();
 				while(fieldsResult.next() != false)
 				{
-					//Grab field varables
+					//Grab field variables
 					id = fieldsResult.getInt("id");
 					owner = UUID.fromString(fieldsResult.getString("Owner"));
 					block1String = fieldsResult.getString("block1");
@@ -70,6 +98,7 @@ public void getFields()
 					
 					//Add field to list
 					plugin.fields.add(fieldToAdd);
+					
 				}
 			} 
 			catch (SQLException e) 
@@ -89,7 +118,7 @@ public void getFields()
 				try
 				{
 					//add field to the database
-					Connection myConn = DriverManager.getConnection("jdbc:mysql://144.217.68.13:3306/mc30874","mc30875","cad6a753e0");
+					Connection myConn = cpds.getConnection();
 					PreparedStatement myStatement = myConn.prepareStatement("INSERT INTO ProtectionFields"  + "VALUES (?,?,?,?,?)");
 					myStatement.setInt(1, field.getId());
 					myStatement.setString(2, field.getOwner().toString());
@@ -97,10 +126,11 @@ public void getFields()
 					String block1String = block1.getBlockX() + "," + block1.getBlockY() + "," + block1.getBlockZ();
 					myStatement.setString(3, block1String);
 					Location block2 = field.getBlock2();
-					String block2String = block1.getBlockX() + "," + block1.getBlockY() + "," + block1.getBlockZ();
+					String block2String = block2.getBlockX() + "," + block2.getBlockY() + "," + block2.getBlockZ();
 					myStatement.setString(4, block2String);
 					myStatement.setString(5, field.getWorld().toString());
 					myStatement.execute();
+					
 				}
 				catch(Exception e)
 				{
@@ -118,7 +148,7 @@ public void getFields()
 				try
 				{
 					//add field to the database
-					Connection myConn = DriverManager.getConnection("jdbc:mysql://144.217.68.13:3306/mc30874","mc30875","cad6a753e0");
+					Connection myConn = cpds.getConnection();
 					PreparedStatement myStatement = myConn.prepareStatement("INSERT INTO FieldMembers"  + "VALUES (?,?)");
 					myStatement.setString(1, player.getUniqueId().toString());
 					myStatement.setInt(2, field.getId());
@@ -131,6 +161,66 @@ public void getFields()
 				}
 			}
 		});
+	}
+	public void removeMember(final ProtectionField field, final Player player)
+	{
+		Bukkit.getScheduler().runTaskAsynchronously(this.plugin, new Runnable()
+		{
+			public void run() 
+			{
+				try
+				{
+					//add field to the database
+					Connection myConn = cpds.getConnection();
+					PreparedStatement myStatement = myConn.prepareStatement("DELETE FROM FieldMembers WHERE uuid =? AND fieldID = ?;");
+					myStatement.setString(1, player.getUniqueId().toString());
+					myStatement.setInt(2, field.getId());
+					myStatement.execute();
+					
+					
+				}
+				catch(Exception e)
+				{
+					
+				}
+			}
+		});
+	}
+	public void deleteField(final ProtectionField field)
+	{
+		Bukkit.getScheduler().runTaskAsynchronously(this.plugin, new Runnable()
+		{
+			public void run() 
+			{
+				try
+				{
+					//Remove field from ProtectionField table
+					Connection myConn = cpds.getConnection();
+					PreparedStatement myStatement = myConn.prepareStatement("DELETE FROM ProtectionFields WHERE id =?;");
+					myStatement.setInt(1, field.getId());
+					myStatement.execute();
+					
+					//Remove all members of deleted field from the field members table
+				
+					myStatement = myConn.prepareStatement("DELETE FROM FieldMembers WHERE fieldID = ?;");						
+					myStatement.setInt(1, field.getId());
+					myStatement.execute();
+					
+					
+					
+				
+					
+				}
+				catch(Exception e)
+				{
+					
+				}
+			}
+		});
+	}
+	public void closeConnections()
+	{
+		cpds.close();
 	}
 	
 }

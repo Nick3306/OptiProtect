@@ -15,6 +15,7 @@ public class ProtectionField
 	Location block1;
 	Location block2;
 	World world;
+	Boolean pvp = false;
 	
 	ProtectionField(World world, Location block1, Location block2, UUID owner, int id)
 	{

@@ -59,6 +59,84 @@ public class CommandHandler implements CommandExecutor
 				}
 				
 			}
+			if(args[0].equalsIgnoreCase("addmember"))
+			{
+				if(args.length <=1)
+				{
+					player.sendMessage(ChatColor.RED + "Incorrect usage: /protect addmember (membername)");
+					return false;
+				}
+				if(args.length == 2)
+				{
+					ProtectionField field = util.getPField(player.getLocation());			
+					if(field == null)
+					{
+						player.sendMessage(ChatColor.RED + "You are not in a protection field!");
+						return false;
+					}
+					else
+					{
+						if(field.getOwner() == player.getUniqueId())
+						{
+							if(plugin.getServer().getPlayer(args[1]) != null)
+							{
+								Player playerToAdd = plugin.getServer().getPlayer(args[1]);
+								plugin.sql.addMember(field, playerToAdd);
+								return true;
+							}
+							else
+							{
+								player.sendMessage(ChatColor.RED + "Player not found!");
+								return false;
+							}
+						}
+						else
+						{
+							player.sendMessage(ChatColor.RED + "You are not the owner of this field!");
+						}
+					
+					}
+				}
+			}
+			if(args[0].equalsIgnoreCase("removemember"))
+			{
+				if(args.length <=1)
+				{
+					player.sendMessage(ChatColor.RED + "Incorrect usage: /protect removemember (membername)");
+					return false;
+				}
+				if(args.length == 2)
+				{
+					ProtectionField field = util.getPField(player.getLocation());
+					if(field == null)
+					{
+						player.sendMessage(ChatColor.RED + "You are not in a protection field!");
+						return false;
+					}
+					else
+					{
+						if(field.getOwner() == player.getUniqueId())
+						{
+							if(plugin.getServer().getPlayer(args[1]) != null)
+							{
+								Player playerToAdd = plugin.getServer().getPlayer(args[1]);
+								plugin.sql.removeMember(field, playerToAdd);
+								return true;
+							}
+							else
+							{
+								player.sendMessage(ChatColor.RED + "Player not found!");
+								return false;
+							}
+						}
+						else
+						{
+							player.sendMessage(ChatColor.RED + "You are not the owner of this field!");
+						}
+					
+					}
+				}
+			}
 		}
 		return false;
 	}
