@@ -2,52 +2,34 @@ package Nick3306.github.io.OptiProtect;
 
 import java.beans.PropertyVetoException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
-
-import javax.naming.NamingException;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-
-import com.mchange.v2.c3p0.jboss.C3P0PooledDataSource;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.zaxxer.hikari.*;
 
 
 public class MySql 
 {
 	private Main plugin;
 	private Utilities util;
-	ComboPooledDataSource cpds;
+	HikariDataSource dataSource;
 	public MySql(Main plugin)
 	{
+		dataSource = new HikariDataSource();
 		this.plugin = plugin;
 		this.util = this.plugin.util;
+				
 		
-		cpds = new ComboPooledDataSource();
-		try
-		{
-			cpds.setDriverClass( "com.mysql.jdbc.Driver" );
-		} catch (PropertyVetoException e)
-		{
-			
-			e.printStackTrace();
-		} 
 		//loads the jdbc driver
-		cpds.setJdbcUrl( "jdbc:mysql://144.217.68.13:3306/mc30874" );
-		cpds.setUser("mc30875");
-		cpds.setPassword("cad6a753e0");
-
-		// the settings below are optional -- c3p0 can work with defaults
-		cpds.setInitialPoolSize(5);
-		cpds.setMinPoolSize(5);
-		cpds.setAcquireIncrement(5);
-		cpds.setMaxPoolSize(15);
+		dataSource.setMaximumPoolSize(10);
+		dataSource.setJdbcUrl("jdbc:mysql://144.217.68.13:3306/mc30875?autoReconnect=true&useSSL=false");
+		dataSource.setUsername("mc30875");
+		dataSource.setPassword("cad6a753e0");	
 	}
 public void getFields()
 {
@@ -65,7 +47,7 @@ public void getFields()
 			try 
 			{
 				//Connection myConn = DriverManager.getConnection("jdbc:mysql://144.217.68.13:3306/mc30874","mc30875","cad6a753e0");
-				Connection myConn = cpds.getConnection();
+				Connection myConn = dataSource.getConnection();
 				PreparedStatement myStatement = myConn.prepareStatement("SELECT * FROM ProtectionFields;");
 				ResultSet fieldsResult = myStatement.executeQuery();
 				while(fieldsResult.next() != false)
@@ -118,7 +100,7 @@ public void getFields()
 				try
 				{
 					//add field to the database
-					Connection myConn = cpds.getConnection();
+					Connection myConn = dataSource.getConnection();
 					PreparedStatement myStatement = myConn.prepareStatement("INSERT INTO ProtectionFields"  + "VALUES (?,?,?,?,?)");
 					myStatement.setInt(1, field.getId());
 					myStatement.setString(2, field.getOwner().toString());
@@ -148,7 +130,7 @@ public void getFields()
 				try
 				{
 					//add field to the database
-					Connection myConn = cpds.getConnection();
+					Connection myConn = dataSource.getConnection();
 					PreparedStatement myStatement = myConn.prepareStatement("INSERT INTO FieldMembers"  + "VALUES (?,?)");
 					myStatement.setString(1, player.getUniqueId().toString());
 					myStatement.setInt(2, field.getId());
@@ -171,7 +153,7 @@ public void getFields()
 				try
 				{
 					//add field to the database
-					Connection myConn = cpds.getConnection();
+					Connection myConn = dataSource.getConnection();
 					PreparedStatement myStatement = myConn.prepareStatement("DELETE FROM FieldMembers WHERE uuid =? AND fieldID = ?;");
 					myStatement.setString(1, player.getUniqueId().toString());
 					myStatement.setInt(2, field.getId());
@@ -195,7 +177,7 @@ public void getFields()
 				try
 				{
 					//Remove field from ProtectionField table
-					Connection myConn = cpds.getConnection();
+					Connection myConn = dataSource.getConnection();
 					PreparedStatement myStatement = myConn.prepareStatement("DELETE FROM ProtectionFields WHERE id =?;");
 					myStatement.setInt(1, field.getId());
 					myStatement.execute();
@@ -220,7 +202,7 @@ public void getFields()
 	}
 	public void closeConnections()
 	{
-		cpds.close();
+		dataSource.close();
 	}
 	
 }

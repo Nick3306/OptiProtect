@@ -23,15 +23,18 @@ public class RegionDefineListener implements Listener
 		Player player = event.getPlayer();
 		if(util.definingField(player))
 		{
+			player.sendMessage("In first if");
 			Location block = event.getBlockPlaced().getLocation();		
 			ProtectionField field = util.getNewField(player);
 			if (field.getBlock1() == null)
 			{
+				player.sendMessage("In second if");
 				field.setBlock1(block);
 				event.setCancelled(true);
 			}
 			else if (field.getBlock2() == null)
 			{
+				player.sendMessage("In else if");
 				field.setBlock2(block);
 				double area = field.getArea();
 				// Check if they have enough to buy the protection or if its free
